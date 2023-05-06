@@ -1,6 +1,6 @@
-const User = require("../Db/models/User.model");
+const User = require("../db/models/User.model");
 const axios = require('axios');
-const ServiceProvider = require("../Db/models/ServiceProvider.model");
+const ServiceProvider = require("../db/models/ServiceProvider.model");
 const jwt = require("jsonwebtoken");
 const { client } = require("../config/redisConnect")
 
@@ -17,7 +17,7 @@ const auth_user = async (req, res) => {
 
         const { data } = await axios.post('https://jicro.authlink.me', { waId }, config);
         const { userMobile, userName } = data.data;
-        const UserData = await ServiceProvider.findOne({ phone_number: userMobile });
+        const UserData = await User.findOne({ phone_number: userMobile });
         if (UserData) {
             const JWT = jwt.sign({ id: UserData._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
             res.send({
