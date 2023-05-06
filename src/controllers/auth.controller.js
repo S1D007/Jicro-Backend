@@ -22,7 +22,7 @@ const auth_user = async (req, res) => {
             const JWT = jwt.sign({ id: UserData._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
             res.send({
                 response: true,
-                user,
+                user:UserData,
                 token: JWT,
             })
         }
