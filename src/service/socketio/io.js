@@ -17,7 +17,7 @@ module.exports = function startSocketServer(server,port) {
       });
     });
   
-    server.listen(port, () => {
+    server.listen(3000, () => {
       console.log('Socket listening on localhost:3000');
     });
   }
