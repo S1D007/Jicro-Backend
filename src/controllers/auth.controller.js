@@ -25,7 +25,7 @@ const auth_user = async (req, res) => {
                 user:UserData,
                 token: JWT,
             })
-        }
+        }else{
         const user = new User({
             phone_number: userMobile,
             name: userName,
@@ -44,6 +44,7 @@ const auth_user = async (req, res) => {
             user,
             token: JWT,
         });
+    }
     } catch (error) {
         console.log(error);
         res.status(400).json({
