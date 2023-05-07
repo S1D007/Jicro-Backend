@@ -15,7 +15,7 @@ const FCMinit = require("./src/service/Notification/Notification.js");
 const io = require('./src/service/socketio/io.js')
 connectToDatabase()
 io(server)
-connection()
+// connection()
 FCMinit()
 // middlewares
 app.use(cors())
