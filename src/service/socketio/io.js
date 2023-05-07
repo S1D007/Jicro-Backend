@@ -16,8 +16,4 @@ module.exports = function startSocketServer(server,port) {
       socket.on('disconnect', () => {
       });
     });
-  
-    server.listen(3000, () => {
-      console.log('Socket listening on localhost:3000');
-    });
   }
