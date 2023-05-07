@@ -26,10 +26,10 @@ const sendNotification = async (token, title, body, channelId, sound) => {
         }
     )
         .then((response) => {
-            console.log('Successfully sent message:', response);
+            
         })
         .catch((error) => {
-            console.log('Error sending message:', error);
+            
         });
 }
 

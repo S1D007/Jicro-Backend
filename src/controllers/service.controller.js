@@ -49,7 +49,7 @@ const add_service = async (req, res) => {
 
 const get_services = async (req, res) => {
   const { latitude, longitude, limit, radius } = req.body;
-  console.log(req.body)
+
   const nearbySP = await ServiceProvider.find({
     location: {
       $near: {
@@ -68,7 +68,7 @@ const get_services = async (req, res) => {
     }
   }).populate('provider', 'name ratings logo profession location.coordinates')
     .then((servicesList) => {
-      console.log(servicesList)
+
       const services = servicesList.map(service => service)
       res.json(services);
     })
@@ -79,7 +79,7 @@ const get_services = async (req, res) => {
 };
 const get_service = async (req, res) => {
   const { _id } = req.body;
-  const doc  = await Service.findOne({_id}).populate('provider','name title banner logo ratings')
+  const doc = await Service.findOne({ _id }).populate('provider', 'name title banner logo ratings')
   res.send(doc)
 }
 const order_service = async (req, res) => {
@@ -121,6 +121,17 @@ const order_service = async (req, res) => {
   res.send({ response: true, orderID });
 };
 
+const update_status = async (req,res) => {
+  const { _id, status } = req.body;
+  await Order.findOneAndUpdate({ _id }, {
+    $set: {
+      status
+    }
+  })
+  res.send({
+    response: true
+  })
+}
 
 
-module.exports = { add_service, get_services, get_service, order_service };
+module.exports = { add_service, get_services, get_service, order_service, update_status };

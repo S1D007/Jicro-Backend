@@ -14,8 +14,8 @@ const { connection, client } = require("./src/config/redisConnect");
 const FCMinit = require("./src/service/Notification/Notification.js");
 const io = require('./src/service/socketio/io.js')
 connectToDatabase()
-io(server, port)
-// connection()
+io(server)
+connection()
 FCMinit()
 // middlewares
 app.use(cors())
@@ -34,5 +34,5 @@ app.get("/", (req, res) => {
 
 
 server.listen(port, () => {
-    console.log(`connected to http://localhost:${port} 🚀`);
+    console.log('Live!')
 })

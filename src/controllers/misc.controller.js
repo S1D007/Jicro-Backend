@@ -8,9 +8,11 @@ cloudinary.config({
 
 const upload = async(req,res)=>{
         const files = req.files.img
-        await cloudinary.uploader.upload(files.tempFilePath, async (err, result) => {
+        await cloudinary.uploader.upload(files.tempFilePath, {
+            quality: 80 // Change the quality value as needed
+        }, async (err, result) => {
             res.send({
-                result:result.url
+                result:result.secure_url
             })
         })
 }

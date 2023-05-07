@@ -1,7 +1,7 @@
 const { client } = require("../config/redisConnect")
 const axios = require("axios");
 module.exports = async function check(req, res, next) {
-    console.log(req.body)
+    
     const { waId } = req?.body
     const config = {
         headers: {

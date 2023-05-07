@@ -4,12 +4,13 @@ module.exports = function startSocketServer(server,port) {
     const io = socketIO(server);
   
     io.on('connection', (socket) => {  
+      console.log('Connected')
       socket.on('join room', (room) => {
         socket.join(room);
-        console.log(room)
+        
       });
       socket.on('delivery location update', (data) => {
-        console.log(data.location)
+        
         io.to(data.room).emit('delivery location receive', data.location);
       });
   

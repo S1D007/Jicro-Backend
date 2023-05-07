@@ -24,7 +24,7 @@ route.post("/auth-user", auth_user)
 route.post("/auth-service-provider", auth_serviceProvider)
 
 // Add Service
-const { add_service, get_services, get_service, order_service } = require("../controllers/service.controller")
+const { add_service, get_services, get_service, order_service, update_status } = require("../controllers/service.controller")
 /** 
 * @Method POST
 * @Route /auth-service-provider
@@ -89,5 +89,10 @@ route.post("/get-sp", verifyToken, getDetails)
  * @FOR ServiceProvider's
  */
 route.post("/get-orders",verifyToken, getOrders)
-
+/** 
+ * @Method POST
+ * @Route /update-status
+ * @FOR ServiceProviders's
+ */
+route.post('/update-status',update_status)
 module.exports = route
