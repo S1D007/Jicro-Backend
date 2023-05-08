@@ -29,25 +29,27 @@ const auth_user = async (req, res) => {
                 user:UserData,
                 token: JWT,
             })
+        }else{
+                const user = new User({
+                phone_number: userMobile,
+                name: userName,
+                location: {
+                    address_formated: address,
+                    coordinates: [long, lat]
+                },
+                token
+            });
+
+            const JWT = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+
+            await user.save();
+            res.status(200).json({
+                response: true,
+                user,
+                token: JWT,
+            });
         }
-        const user = new User({
-            phone_number: userMobile,
-            name: userName,
-            location: {
-                address_formated: address,
-                coordinates: [long, lat]
-            },
-            token
-        });
-
-        const JWT = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
-
-        await user.save();
-        res.status(200).json({
-            response: true,
-            user,
-            token: JWT,
-        });
+        
     } catch (error) {
         
         res.status(400).json({
