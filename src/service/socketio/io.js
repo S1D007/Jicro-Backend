@@ -10,7 +10,7 @@ module.exports = function startSocketServer(server,port) {
         
       });
       socket.on('delivery location update', (data) => {
-        
+        console.log(data.location)
         io.to(data.room).emit('delivery location receive', data.location);
       });
   
