@@ -5,7 +5,7 @@ const ServiceProvider = require("../db/models/ServiceProvider.model");
 const getDetails = async (req, res) => {
   const id = req.id;
   try {
-    const serviceProvider = await ServiceProvider.findOne({ _id: id }).select('logo banner ratings')
+    const serviceProvider = await ServiceProvider.findOne({ _id: id }).select('logo banner ratings name')
     if (!serviceProvider) {
       return res.status(404).json({
         success: false,
@@ -27,12 +27,28 @@ const getDetails = async (req, res) => {
 const getOrders = async (req, res) => {
   const _id = req.id;
   const doc = await Order.find({ provider: _id })
-  .populate('service','title price')
-  .populate('user', 'name location')
+    .populate('service', 'title price')
+    .populate('user', 'name location')
   res.send({
     response: true,
     data: doc
   })
 }
 
-module.exports = { getDetails, getOrders };
+const updateProfile = async (req, res) => {
+  const _id = req.id;
+  const {updates} = req.body;
+
+  try {
+      await ServiceProvider.findOneAndUpdate({ _id },{
+        $set:updates
+      });
+      res.send({
+        response: true
+      });
+  } catch (error) {
+    res.status(400).send(error);
+  }
+}
+
+module.exports = { getDetails, getOrders, updateProfile };

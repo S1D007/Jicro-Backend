@@ -18,19 +18,19 @@ const auth_user = async (req, res) => {
         const { userMobile, userName } = data.data;
         const UserData = await User.findOne({ phone_number: userMobile });
         if (UserData) {
-            await User.findOneAndUpdate({phone_number: userMobile},{
-                $set:{
+            await User.findOneAndUpdate({ phone_number: userMobile }, {
+                $set: {
                     token
                 }
             })
             const JWT = jwt.sign({ id: UserData._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
             res.send({
                 response: true,
-                user:UserData,
+                user: UserData,
                 token: JWT,
             })
-        }else{
-                const user = new User({
+        } else {
+            const user = new User({
                 phone_number: userMobile,
                 name: userName,
                 location: {
@@ -49,9 +49,8 @@ const auth_user = async (req, res) => {
                 token: JWT,
             });
         }
-        
     } catch (error) {
-        
+
         res.status(400).json({
             response: false,
             error: error.message,
@@ -121,7 +120,7 @@ const auth_serviceProvider = async (req, res) => {
             }
         }
     } catch (error) {
-        
+
         res.status(400).json({
             response: false,
             error: error.message,

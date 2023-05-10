@@ -1,3 +1,5 @@
+const Service = require('../db/models/Service.model');
+
 const cloudinary = require('cloudinary').v2;
 
 cloudinary.config({
@@ -17,4 +19,20 @@ const upload = async(req,res)=>{
         })
 }
 
-module.exports = upload
+const search = async (req, res) => {
+    const { term, page = 1, perPage = 5 } = req.body;
+    const services = await Service.find({
+      $or: [
+        { title: { $regex: new RegExp(term, 'i') } },
+        { details: { $regex: new RegExp(term, 'i') } },
+        { included: { $regex: new RegExp(term, 'i') } },
+        { notIncluded: { $regex: new RegExp(term, 'i') } },
+      ],
+    }).select('title _id images').limit(perPage).skip((page - 1) * perPage)
+    res.json({
+        response:true,
+        data:services
+    });
+}
+
+module.exports = {upload , search}

@@ -46,41 +46,106 @@ const add_service = async (req, res) => {
     });
   }
 };
-
 const get_services = async (req, res) => {
-  const { latitude, longitude, limit, radius } = req.body;
+  const {
+    latitude,
+    longitude,
+    radius,
+    minPrice,
+    maxPrice,
+    minRatings,
+    page = 1,
+    perPage = 10,
+    sortBy,
+    discount,
+    category
+  } = req.body;
 
-  const nearbySP = await ServiceProvider.find({
-    location: {
-      $near: {
-        $geometry: {
-          type: 'Point',
-          coordinates: [longitude, latitude]
-        },
-        $maxDistance: radius * 1000,
+  try {
+    const nearbySP = await ServiceProvider.find({
+      location: {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [longitude, latitude] // Convert to float
+          },
+          $maxDistance: radius * 1000
+        }
       }
-    }
-  }).select("_id").limit(limit)
-
-  await Service.find({
-    provider: {
-      $in: nearbySP.map(provider => provider._id)
-    }
-  }).populate('provider', 'name ratings logo profession location.coordinates')
-    .then((servicesList) => {
-
-      const services = servicesList.map(service => service)
-      res.json(services);
     })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send('An error occurred while fetching services');
-    });
+      .select('_id')
+      .limit(perPage)
+      .skip((page - 1) * perPage);
+
+    const serviceQuery = {
+      provider: {
+        $in: nearbySP.map((provider) => provider._id)
+      }
+    };
+
+    if (minPrice && maxPrice) {
+      serviceQuery['price.manupulated'] = {
+        $gte: minPrice,
+        $lte: maxPrice
+      };
+    } else if (minPrice) {
+      serviceQuery['price.manupulated'] = { $gte: minPrice };
+    } else if (maxPrice) {
+      serviceQuery['price.manupulated'] = { $lte: maxPrice };
+    }
+    
+    if (minRatings) {
+      serviceQuery['provider.ratings'] = { $gte: minRatings };
+    }
+
+    if (discount) {
+      serviceQuery['price.discount'] = { $gt: 0 };
+    }
+
+    if (category) {
+      serviceQuery['category'] = category;
+    }
+
+    const sortQuery = {};
+
+    if (sortBy === 'priceAsc') {
+      sortQuery['price.manupulated'] = 1;
+    } else if (sortBy === 'priceDesc') {
+      sortQuery['price.manupulated'] = -1;
+    } else if (sortBy === 'ratingAsc') {
+      sortQuery['ratings'] = 1;
+    } else if (sortBy === 'ratingDesc') {
+      sortQuery['ratings'] = -1;
+    }
+
+    const servicesList = await Service.find(serviceQuery)
+      .populate('provider', 'name ratings logo profession location.coordinates')
+      .sort(sortQuery);
+
+    const services = servicesList.map((service) => service);
+    res.json(services);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('An error occurred while fetching services');
+  }
 };
+
+
 const get_service = async (req, res) => {
   const { _id } = req.body;
   const doc = await Service.findOne({ _id }).populate('provider', 'name title banner logo ratings')
   res.send(doc)
+}
+const get_all_services = async (req, res) => {
+  const _id = req.id;
+  const services = await Service.find({
+    provider: _id
+  })
+
+  res.send({
+    response: true,
+    data: services
+  })
 }
 const order_service = async (req, res) => {
   const { service_provider_id, service_id, note } = req.body;
@@ -97,7 +162,8 @@ const order_service = async (req, res) => {
     user: user_id,
     service: service_id,
     provider: service_provider_id,
-    orderID
+    orderID,
+    note
   });
 
   await Promise.all([
@@ -121,7 +187,7 @@ const order_service = async (req, res) => {
   res.send({ response: true, orderID });
 };
 
-const update_status = async (req,res) => {
+const update_status = async (req, res) => {
   const { _id, status } = req.body;
   await Order.findOneAndUpdate({ _id }, {
     $set: {
@@ -133,5 +199,15 @@ const update_status = async (req,res) => {
   })
 }
 
+const update_service = async () => {
+  const { _id, updates } = req.body;
+  await Service.findOneAndUpdate({ _id }, {
+    $set: updates
+  })
+  res.send({
+    response: true,
+  })
+}
 
-module.exports = { add_service, get_services, get_service, order_service, update_status };
+
+module.exports = { add_service, get_services, get_service, order_service, update_status, get_all_services, update_service };

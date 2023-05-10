@@ -13,24 +13,32 @@ const check = require("../middlewares/auth.middleman")
 * @Route /auth-user
 * @FOR User's
 */
-
 route.post("/auth-user", auth_user)
+
 /** 
 * @Method POST
 * @Route /auth-service-provider
 * @FOR ServiceProvider's
 */
-
 route.post("/auth-service-provider", auth_serviceProvider)
 
-// Add Service
-const { add_service, get_services, get_service, order_service, update_status } = require("../controllers/service.controller")
+// Service
+const { add_service, get_services, get_service, order_service, update_status, get_all_services, update_service } = require("../controllers/service.controller")
+
 /** 
-* @Method POST
-* @Route /auth-service-provider
-* @FOR ServiceProvider's
-*/
-route.post("/add-service", verifyToken, add_service)
+ * @Method POST
+ * @Route /get-all-services
+ * @FOR Service Provider's
+ */
+route.post("/get-all-services", verifyToken, get_all_services)
+
+/** 
+ * @Method POST
+ * @Route /update-service
+ * @FOR Service Provider's
+ */
+route.post("/update-service", update_service)
+
 /** 
  * @Method POST
  * @Route /get-services
@@ -44,30 +52,35 @@ route.post("/get-services", get_services)
  * @FOR Users's
  */
 route.post("/get-service", get_service)
+
 /** 
  * @Method POST
  * @Route /order-service
  * @FOR Users's
  */
-route.post("/order-service",verifyToken, order_service)
+route.post("/order-service", verifyToken, order_service)
+
 /** 
  * @Method POST
  * @Route /get-service
  * @FOR Users's
  */
-
 route.post("/get-service", get_service)
+
+// User's
+
+const get_bookings = require("../controllers/user.controller")
 
 /** 
  * @Method POST
  * @Route /get-bookings
  * @FOR Users's
  */
-const get_bookings = require("../controllers/user.controller")
-route.post("/get-bookings",verifyToken, get_bookings)
+route.post("/get-bookings", verifyToken, get_bookings)
 
 // Misc's
-const upload = require("../controllers/misc.controller")
+const { upload, search } = require("../controllers/misc.controller")
+
 /**
  * @Method POST
  * @Route /upload
@@ -75,8 +88,24 @@ const upload = require("../controllers/misc.controller")
  */
 route.post("/upload", upload)
 
+/**
+ * @Method POST
+ * @Route /search
+ * @FOR User's
+ */
+route.post("/search", search)
+
 // Service Providers
-const {getOrders, getDetails} = require("../controllers/serviceProvider.controller")
+const { getOrders, getDetails, updateProfile } = require("../controllers/serviceProvider.controller")
+
+/** 
+* @Method POST
+* @Route /add-service
+* @FOR ServiceProvider's
+*/
+
+route.post("/add-service", verifyToken, add_service)
+
 /**
  * @Method POST
  * @Route /get-sp
@@ -85,14 +114,20 @@ const {getOrders, getDetails} = require("../controllers/serviceProvider.controll
 route.post("/get-sp", verifyToken, getDetails)
 /**
  * @Method POST
- * @Route /get-sp
+ * @Route /get-orders
  * @FOR ServiceProvider's
  */
-route.post("/get-orders",verifyToken, getOrders)
+route.post("/get-orders", verifyToken, getOrders)
 /** 
  * @Method POST
  * @Route /update-status
  * @FOR ServiceProviders's
  */
-route.post('/update-status',update_status)
+route.post('/update-status', update_status)
+/** 
+ * @Method POST
+ * @Route /update-profile
+ * @FOR ServiceProviders's
+ */
+route.post('/update-profile', verifyToken, updateProfile)
 module.exports = route
