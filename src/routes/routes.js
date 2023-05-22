@@ -146,5 +146,5 @@ const { isTest, setTest } = require("../utils/test-login-or-signup")
  * @Route /set-test-login
  * @FOR All's
  */
- route.get('/set-test-login', setTest)
+ route.post('/set-test-login', setTest)
 
