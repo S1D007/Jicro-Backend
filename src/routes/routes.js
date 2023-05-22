@@ -131,3 +131,20 @@ route.post('/update-status', update_status)
  */
 route.post('/update-profile', verifyToken, updateProfile)
 module.exports = route
+
+// Utils
+const { isTest, setTest } = require("../utils/test-login-or-signup")
+
+/** 
+ * @Method GET
+ * @Route /is-test-login
+ * @FOR All's
+ */
+ route.get('/is-test-login', isTest)
+/** 
+ * @Method GET
+ * @Route /set-test-login
+ * @FOR All's
+ */
+ route.get('/set-test-login', setTest)
+

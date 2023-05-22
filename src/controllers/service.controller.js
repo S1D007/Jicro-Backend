@@ -7,7 +7,7 @@ const sendNotification = require("../service/Notification/sendNotification");
 
 const add_service = async (req, res) => {
   const id = req.id;
-  const { title, images, price, details, note, included, notIncluded } = req.body;
+  const { title, images, price, details, note, included, notIncluded, category, subCategory } = req.body;
   const orderID = `J-${title.split(' ').map((e) => e.charAt(0)).join('')}${Math.floor(Math.random() * 100)}`.toUpperCase();
   const random = (Math.random() * 4)
   const multiplyVal = Math.floor(random) === 0 ? 1 : random
@@ -58,7 +58,8 @@ const get_services = async (req, res) => {
     perPage = 10,
     sortBy,
     discount,
-    category
+    category,
+    subCategory
   } = req.body;
 
   try {
@@ -104,6 +105,9 @@ const get_services = async (req, res) => {
 
     if (category) {
       serviceQuery['category'] = category;
+    }
+    if(subCategory){
+      serviceQuery['subCategory'] = subCategory 
     }
 
     const sortQuery = {};

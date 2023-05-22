@@ -43,7 +43,15 @@ const scrviceSchema = mongoose.Schema({
         }
     ],
     orderID: String,
-    note: String
+    note: String,
+    type:{
+        category:{
+            type:String
+        },
+        subCategory:{
+            type:String
+        }
+    }
 })
 
 module.exports = scrviceSchema;

@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 
 const auth_user = async (req, res) => {
     try {
-        const { waId, address, long, lat, token } = req.body;
+        const { waId, address, long, lat, token, test_num } = req.body;
         const config = {
             headers: {
                 'clientId': 'lytvflbj',
@@ -14,22 +14,27 @@ const auth_user = async (req, res) => {
             },
         };
 
-        const { data } = await axios.post('https://jicro.authlink.me', { waId }, config);
-        const { userMobile, userName } = data.data;
-        const UserData = await User.findOne({ phone_number: userMobile });
-        if (UserData) {
-            await User.findOneAndUpdate({ phone_number: userMobile }, {
-                $set: {
-                    token
-                }
-            })
-            const JWT = jwt.sign({ id: UserData._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
-            res.send({
-                response: true,
-                user: UserData,
-                token: JWT,
-            })
+        let userMobile, userName, UserData;
+
+        if (!test_num) {
+            const { data } = await axios.post('https://jicro.authlink.me', { waId }, config);
+            ({ userMobile, userName } = data.data);
+            UserData = await User.findOne({ phone_number: userMobile });
         } else {
+            const test_user = await User.findOne({ phone_number: test_num })
+            const JWT = jwt.sign({ id: test_user._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+            res.status(200).json({
+                response: true,
+                user: test_user,
+                token: JWT,
+            });
+        }
+
+        if (UserData) {
+            if (!test_num) {
+                await User.findOneAndUpdate({ phone_number: userMobile }, { $set: { token } });
+            }
+        } else if (!test_num && !UserData) {
             const user = new User({
                 phone_number: userMobile,
                 name: userName,
@@ -40,23 +45,25 @@ const auth_user = async (req, res) => {
                 token
             });
 
-            const JWT = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
-
             await user.save();
-            res.status(200).json({
-                response: true,
-                user,
-                token: JWT,
-            });
+            UserData = user;
         }
-    } catch (error) {
 
-        res.status(400).json({
-            response: false,
-            error: error.message,
+        const JWT = jwt.sign({ id: UserData._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+        res.status(200).json({
+            response: true,
+            user: UserData,
+            token: JWT,
         });
+    } catch (error) {
+        console.log(error)
+        // res.status(400).json({
+        //     response: false,
+        //     error: error.message,
+        // });
     }
 };
+
 
 const auth_serviceProvider = async (req, res) => {
     try {
