@@ -23,7 +23,7 @@ const auth_user = async (req, res) => {
         } else {
             const test_user = await User.findOne({ phone_number: test_num })
             const JWT = jwt.sign({ id: test_user._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
-            res.status(200).json({
+            return res.status(200).json({
                 response: true,
                 user: test_user,
                 token: JWT,
@@ -57,10 +57,10 @@ const auth_user = async (req, res) => {
         });
     } catch (error) {
         console.log(error)
-        // res.status(400).json({
-        //     response: false,
-        //     error: error.message,
-        // });
+        res.status(400).json({
+            response: false,
+            error: error.message,
+        });
     }
 };
 
