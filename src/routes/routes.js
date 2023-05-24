@@ -133,6 +133,7 @@ route.post('/update-profile', verifyToken, updateProfile)
 module.exports = route
 
 // Demand a Service
+const { acceptDemandedService, demandaService } = require("../controllers/demandService.controller")
 
 /** 
  * @Method POST
@@ -149,7 +150,6 @@ route.post("/accept-a-demanded-service", acceptDemandedService)
 
 // Utils
 const { isTest, setTest } = require("../utils/test-login-or-signup")
-const { acceptDemandedService } = require("../controllers/demandService.controller")
 
 /** 
  * @Method GET
