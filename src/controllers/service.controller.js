@@ -32,7 +32,11 @@ const add_service = async (req, res) => {
       orderID,
       note,
       included,
-      notIncluded
+      notIncluded,
+      type:{
+        category,
+        sub_category
+      }
     });
     await Promise.all([service.save(), SP.services.push(service._id), SP.save()]);
     res.status(200).json({

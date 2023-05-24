@@ -48,7 +48,7 @@ const scrviceSchema = mongoose.Schema({
         category:{
             type:String
         },
-        subCategory:{
+        sub_category:{
             type:String
         }
     }
