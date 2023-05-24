@@ -111,7 +111,7 @@ const get_services = async (req, res) => {
       serviceQuery['category'] = category;
     }
     if (subCategory) {
-      serviceQuery['subCategory'] = subCategory
+      serviceQuery['sub_category'] = subCategory
     }
 
     const sortQuery = {};
