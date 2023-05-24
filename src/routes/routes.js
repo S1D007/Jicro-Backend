@@ -132,8 +132,24 @@ route.post('/update-status', update_status)
 route.post('/update-profile', verifyToken, updateProfile)
 module.exports = route
 
+// Demand a Service
+
+/** 
+ * @Method POST
+ * @Route /demand-a-service
+ * @FOR User's
+ */
+route.post("/demand-a-service", demandaService)
+/** 
+ * @Method POST
+ * @Route /accept-a-demanded-service
+ * @FOR Service Provider's
+ */
+route.post("/accept-a-demanded-service", acceptDemandedService)
+
 // Utils
 const { isTest, setTest } = require("../utils/test-login-or-signup")
+const { acceptDemandedService } = require("../controllers/demandService.controller")
 
 /** 
  * @Method GET

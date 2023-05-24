@@ -14,7 +14,7 @@ const add_service = async (req, res) => {
   const multipliedVal = Math.floor(price * multiplyVal)
   const endsWithZeroOrFiveorSomethingShit = multipliedVal.toString().endsWith('0') || multipliedVal.toString().endsWith('5') || multipliedVal.toString().endsWith('01')
   const manupulated = !multipliedVal === 100 && endsWithZeroOrFiveorSomethingShit ? multipliedVal - 1 : multipliedVal
-  const discount = (((manupulated - 100) / manupulated) * 100).toFixed(0)
+  const discount = (((manupulated - price) / manupulated) * 100).toFixed(0)
   try {
     const SP = await ServiceProvider.findOne({ _id: id });
     const service = new Service({
@@ -94,7 +94,7 @@ const get_services = async (req, res) => {
     } else if (maxPrice) {
       serviceQuery['price.manupulated'] = { $lte: maxPrice };
     }
-    
+
     if (minRatings) {
       serviceQuery['provider.ratings'] = { $gte: minRatings };
     }
@@ -106,8 +106,8 @@ const get_services = async (req, res) => {
     if (category) {
       serviceQuery['category'] = category;
     }
-    if(subCategory){
-      serviceQuery['subCategory'] = subCategory 
+    if (subCategory) {
+      serviceQuery['subCategory'] = subCategory
     }
 
     const sortQuery = {};
