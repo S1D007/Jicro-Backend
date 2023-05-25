@@ -7,7 +7,7 @@ const sendNotification = require("../service/Notification/sendNotification");
 
 const add_service = async (req, res) => {
   const id = req.id;
-  const { title, images, price, details, note, included, notIncluded, category, subCategory } = req.body;
+  const { title, images, price, details, note, included, notIncluded, category, sub_category } = req.body;
   const orderID = `J-${title.split(' ').map((e) => e.charAt(0)).join('')}${Math.floor(Math.random() * 100)}`.toUpperCase();
   const random = (Math.random() * 4)
   const multiplyVal = Math.floor(random) === 0 ? 1 : random

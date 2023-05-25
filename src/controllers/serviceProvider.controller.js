@@ -5,7 +5,7 @@ const ServiceProvider = require("../db/models/ServiceProvider.model");
 const getDetails = async (req, res) => {
   const id = req.id;
   try {
-    const serviceProvider = await ServiceProvider.findOne({ _id: id }).select('logo banner ratings name services')
+    const serviceProvider = await ServiceProvider.findOne({ _id: id }).select('logo banner ratings name services profession')
     if (!serviceProvider) {
       return res.status(404).json({
         success: false,
