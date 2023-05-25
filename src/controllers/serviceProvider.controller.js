@@ -28,7 +28,7 @@ const getOrders = async (req, res) => {
   const _id = req.id;
   const doc = await Order.find({ provider: _id })
     .populate('service', 'title price phone_number')
-    .populate('user', 'name location')
+    .populate('user', 'name location phone_number')
   res.send({
     response: true,
     data: doc
