@@ -72,7 +72,7 @@ const get_services = async (req, res) => {
         $near: {
           $geometry: {
             type: 'Point',
-            coordinates: [longitude, latitude] // Convert to float
+            coordinates: [longitude, latitude]
           },
           $maxDistance: radius * 1000
         }
@@ -107,11 +107,11 @@ const get_services = async (req, res) => {
       serviceQuery['price.discount'] = { $gt: 0 };
     }
 
-    if (category) {
+    if (category !== undefined) {
       serviceQuery['type.category'] = category;
     }
-    if (subCategory) {
-      serviceQuery['type.sub_category'] = subCategory
+    if (subCategory !== undefined) {
+      serviceQuery['type.sub_category'] = subCategory;
     }
 
     const sortQuery = {};
@@ -137,6 +137,7 @@ const get_services = async (req, res) => {
     res.status(500).send('An error occurred while fetching services');
   }
 };
+
 
 
 const get_service = async (req, res) => {
