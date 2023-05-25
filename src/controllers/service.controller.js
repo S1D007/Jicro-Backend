@@ -107,10 +107,10 @@ const get_services = async (req, res) => {
       serviceQuery['price.discount'] = { $gt: 0 };
     }
 
-    if (category !== undefined) {
+    if (category) {
       serviceQuery['type.category'] = category;
     }
-    if (subCategory !== undefined) {
+    if (subCategory) {
       serviceQuery['type.sub_category'] = subCategory;
     }
 
