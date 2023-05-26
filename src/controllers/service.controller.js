@@ -162,9 +162,9 @@ const order_service = async (req, res) => {
 
   try {
     const [user, serviceProvider, service] = await Promise.all([
-      User.findOne({ _id: user_id }).select('orders token name').lean(),
-      ServiceProvider.findOne({ _id: service_provider_id }).select('orders token name').lean(),
-      Service.findOne({ _id: service_id }).select('buyers orderID title').lean(),
+      User.findOne({ _id: user_id }, 'orders token name').lean(),
+      ServiceProvider.findOne({ _id: service_provider_id }, 'orders token name').lean(),
+      Service.findOne({ _id: service_id }, 'buyers orderID title').lean(),
     ]);
 
     if (!user || !user.token || !serviceProvider || !service) {
@@ -204,6 +204,7 @@ const order_service = async (req, res) => {
     res.status(500).send({ response: false, error: 'Internal server error' });
   }
 };
+
 
 const update_status = async (req, res) => {
   const { _id, status } = req.body;
