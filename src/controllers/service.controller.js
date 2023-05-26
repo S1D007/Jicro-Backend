@@ -160,41 +160,69 @@ const order_service = async (req, res) => {
   const { service_provider_id, service_id, note } = req.body;
   const user_id = req.id;
 
-  const [user, serviceProvider, service] = await Promise.all([
-    User.findOne({ _id: user_id }).select('orders token name').lean(),
-    ServiceProvider.findOne({ _id: service_provider_id }).select('orders token name').lean(),
-    Service.findOne({ _id: service_id }).select('buyers orderID title').lean(),
-  ]);
+  try {
+    const [user, serviceProvider, service] = await Promise.all([
+      User.findOne({ _id: user_id }).select('orders token name').lean(),
+      ServiceProvider.findOne({ _id: service_provider_id }).select('orders token name').lean(),
+      Service.findOne({ _id: service_id }).select('buyers orderID title').lean(),
+    ]);
 
-  const orderID = `${service.orderID}${Math.floor(Math.random() * 100)}`;
-  const order = new Order({
-    user: user_id,
-    service: service_id,
-    provider: service_provider_id,
-    orderID,
-    note
-  });
+    if (!user || !user.token || !serviceProvider || !service) {
+      throw new Error('User, serviceProvider, or service not found');
+    }
 
-  await Promise.all([
-    order.save(),
-    User.updateOne({ _id: user_id }, { $push: { orders: { order: order._id } } }),
-    ServiceProvider.updateOne({ _id: service_provider_id }, { $push: { orders: { order: order._id } } }),
-    Service.updateOne({ _id: service_id }, { $push: { buyers: { orders: { order: order._id } } } }),
-  ]);
+    const orderID = `${service.orderID}${Math.floor(Math.random() * 100)}`;
+    const order = new Order({
+      user: user_id,
+      service: service_id,
+      provider: service_provider_id,
+      orderID,
+      note
+    });
 
-  sendNotification(
-    user.token,
-    `Your Order 📦 for ${service.title} has been Placed 😏 `,
-    `The Order has been placed ${serviceProvider.name} will Come to Your House Shortly, Check For Your Order's Page for More Details`
-  );
-  sendNotification(
-    serviceProvider.token,
-    `You have received 📲 a New Order for 🤑 ${service.title} `,
-    `Please Come to ${user.name} as Soon as Possible`
-  );
+    await Promise.all([
+      order.save(),
+      User.updateOne({ _id: user_id }, { $push: { orders: { order: order._id } } }),
+      ServiceProvider.updateOne({ _id: service_provider_id }, { $push: { orders: { order: order._id } } }),
+      Service.updateOne({ _id: service_id }, { $push: { buyers: { orders: { order: order._id } } } }),
+    ]);
 
-  res.send({ response: true, orderID });
+    sendNotification(
+      user.token,
+      `Your Order 📦 for ${service.title} has been Placed 😏 `,
+      `The Order has been placed ${serviceProvider.name} will Come to Your House Shortly, Check For Your Order's Page for More Details`
+    );
+    sendNotification(
+      serviceProvider.token,
+      `You have received 📲 a New Order for 🤑 ${service.title} `,
+      `Please Come to ${user.name} as Soon as Possible`
+    );
+
+    res.send({ response: true, orderID });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ response: false, error: 'Internal server error' });
+  }
 };
+
+const update_status = async (req, res) => {
+  const { _id, status } = req.body;
+
+  try {
+    await Order.findOneAndUpdate({ _id }, {
+      $set: {
+        status
+      }
+    });
+    res.send({
+      response: true
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ response: false, error: 'Internal server error' });
+  }
+};
+
 
 const update_status = async (req, res) => {
   const { _id, status } = req.body;
