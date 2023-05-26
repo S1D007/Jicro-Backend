@@ -207,25 +207,6 @@ const order_service = async (req, res) => {
 
 const update_status = async (req, res) => {
   const { _id, status } = req.body;
-
-  try {
-    await Order.findOneAndUpdate({ _id }, {
-      $set: {
-        status
-      }
-    });
-    res.send({
-      response: true
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ response: false, error: 'Internal server error' });
-  }
-};
-
-
-const update_status = async (req, res) => {
-  const { _id, status } = req.body;
   await Order.findOneAndUpdate({ _id }, {
     $set: {
       status
