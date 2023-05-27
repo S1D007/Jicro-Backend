@@ -2,40 +2,42 @@ const DemandService = require("../db/models/DemandService.model");
 const ServiceProvider = require("../db/models/ServiceProvider.model");
 const sendNotification = require("../service/Notification/sendNotification");
 
-const demandaService = async (req, res, next) => {
-    const { title, description, images, price, category, sub_category, dateTime } = req.body;
-    const id = req.id
-    try {
-        const orderID = `JD-${title.split(' ').map((e) => e.charAt(0)).join('')}${Math.floor(Math.random() * 100)}`.toUpperCase();
-        const doc = new DemandService({
-            title,
-            description,
-            images,
-            price,
-            type: {
-                category,
-                sub_category
-            },
-            dateTime,
-            orderID,
-            user: id
-        })
-        await doc.save()
-        res.send({
-            response: true
-        })
-        const SPdoc = ServiceProvider.find({ professtion: category }).select("token name")
-        SPdoc.forEach((e, i)=>{
-            sendNotification(e.token,`${e.name} you had received an Order`,`This is a Demanded Service for ${title.slice(0,10)} Grab this Opportunity` )
-        })
-        // next()
-    } catch (e) {
-        res.send({
-            response: false,
-            error: e.message
-        })
-    }
-}
+const demandService = async (req, res, next) => {
+  const { title, description, image, budget, category, sub_category, date } = req.body;
+  const id = req.id;
+  try {
+    const orderID = `JD-${title.split(' ').map((e) => e.charAt(0)).join('')}${Math.floor(Math.random() * 100)}`.toUpperCase();
+    const doc = new DemandService({
+      title,
+      description,
+      image,
+      price: budget,
+      type: {
+        category,
+        sub_category
+      },
+      dateTime: date,
+      orderID,
+      user: id
+    });
+    await doc.save();
+    res.send({
+      response: true
+    });
+    
+    const SPdocs = await ServiceProvider.find({ profession: category }).select("token name");
+    SPdocs.forEach((doc) => {
+      sendNotification(doc.token, `${doc.name}, you have received an order`, `This is a Demanded Service for ${title.slice(0, 10)}. Grab this opportunity.`);
+    });
+    
+    // next()
+  } catch (error) {
+    res.send({
+      response: false,
+      error: error.message
+    });
+  }
+};
 
 const acceptDemandedService = async (req, res) => {
     const { demandedServiceID } = req.body
