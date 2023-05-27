@@ -74,7 +74,7 @@ const get_services = async (req, res) => {
             type: 'Point',
             coordinates: [longitude, latitude]
           },
-          $maxDistance: radius * 1000
+          $maxDistance: radius
         }
       }
     })
