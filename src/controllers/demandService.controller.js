@@ -85,4 +85,4 @@ const getDemanedServiceForAll = async (req, res) => {
     })}
 }
 
-module.exports = { demandaService, acceptDemandedService, getDemanedService, getDemanedServiceForAll }
+module.exports = { demandService, acceptDemandedService, getDemanedService, getDemanedServiceForAll }
