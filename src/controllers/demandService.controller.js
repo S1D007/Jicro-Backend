@@ -40,13 +40,22 @@ const demandaService = async (req, res, next) => {
 const acceptDemandedService = async (req, res) => {
     const { demandedServiceID } = req.body
     const id = req.id
-    
-    const doc = await DemandService.findOne({ _id: demandedServiceID }).populate('user','toekn name')
+     const doc = await DemandService.findOne({ _id: demandedServiceID }).populate('user','toekn name')
     // const SPdoc = await ServiceProvider.findOne({ _id: id }).select('name token')
-    doc.serviceProvider = id
+    if(!doc.serviceProvider){
+        doc.serviceProvider = id
     doc.status = "Accepted"
     await doc.save()
     sendNotification(doc.token, `Your Demand for ${doc.title.slice(0, 5)}... has beed Accepted `, `${doc.name} will arrive to Your Location Soon`, "", "")
+    res.send({
+        response:true
+    })
+    }else{
+        res.status(400).send({
+            response:false,
+            error: "This Orders Has Already been Accepted By Another Service Provider"
+        })
+    }
 }
 const getDemanedService = async (req, res) => {
     const {type} = req.body;
@@ -74,4 +83,4 @@ const getDemanedServiceForAll = async (req, res) => {
     })}
 }
 
-module.exports = { demandaService, acceptDemandedService,getDemanedService }
+module.exports = { demandaService, acceptDemandedService, getDemanedService, getDemanedServiceForAll }
