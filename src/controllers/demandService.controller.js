@@ -61,5 +61,17 @@ const getDemanedService = async (req, res) => {
         data:doc
     })
 }
+const getDemanedServiceForAll = async (req, res) => {
+    const {profession} = req.body;
+    const doc = await DemandService.findOne({ type:{category: profession} }).populate("user").populate("serviceProvider")
+    if(!doc.serviceProvider){
+        res.send({
+        data:doc
+        })
+    }else{
+    res.send({
+        data:[]
+    })}
+}
 
 module.exports = { demandaService, acceptDemandedService,getDemanedService }
