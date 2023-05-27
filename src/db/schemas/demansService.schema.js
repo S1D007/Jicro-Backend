@@ -2,12 +2,10 @@ const mongoose = require("mongoose");
 
 const orderSchema = mongoose.Schema({
     title: {
-        type: mongoose.Types.ObjectId,
-        ref: 'User'
+        type: String
     },
     description: {
-        type: mongoose.Types.ObjectId,
-        ref: 'ServiceProvider'
+        type: String,
     },
     images: [
         {
