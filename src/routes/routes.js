@@ -134,11 +134,17 @@ module.exports = route
 
 // Demand a Service
 const { acceptDemandedService, demandaService, getDemanedService } = require("../controllers/demandService.controller")
-
 /** 
  * @Method POST
  * @Route /get-demanded-service
- * @FOR User's
+ * @FOR Service Providers's
+ */
+
+route.post("/get-all-demanded-service", getDemanedServiceForAll)
+/** 
+ * @Method POST
+ * @Route /get-demanded-service
+ * @FOR User's || Service Provider's
  */
 
 route.post("/get-demanded-service",verifyToken, getDemanedService)
@@ -147,6 +153,7 @@ route.post("/get-demanded-service",verifyToken, getDemanedService)
  * @Route /demand-a-service
  * @FOR User's
  */
+
 route.post("/demand-a-service",verifyToken, demandaService)
 /** 
  * @Method POST
