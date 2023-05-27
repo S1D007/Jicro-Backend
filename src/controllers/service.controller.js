@@ -160,51 +160,41 @@ const order_service = async (req, res) => {
   const { service_provider_id, service_id, note } = req.body;
   const user_id = req.id;
 
-  try {
-    const [user, serviceProvider, service] = await Promise.all([
-      User.findOne({ _id: user_id }, 'orders token name').lean(),
-      ServiceProvider.findOne({ _id: service_provider_id }, 'orders token name').lean(),
-      Service.findOne({ _id: service_id }, 'buyers orderID title').lean(),
-    ]);
+  const [user, serviceProvider, service] = await Promise.all([
+    User.findOne({ _id: user_id }).select('orders token name').lean(),
+    ServiceProvider.findOne({ _id: service_provider_id }).select('orders token name').lean(),
+    Service.findOne({ _id: service_id }).select('buyers orderID title').lean(),
+  ]);
 
-    if (!user || !user.token || !serviceProvider || !service) {
-      throw new Error('User, serviceProvider, or service not found');
-    }
+  const orderID = `${service.orderID}${Math.floor(Math.random() * 100)}`;
+  const order = new Order({
+    user: user_id,
+    service: service_id,
+    provider: service_provider_id,
+    orderID,
+    note
+  });
 
-    const orderID = `${service.orderID}${Math.floor(Math.random() * 100)}`;
-    const order = new Order({
-      user: user_id,
-      service: service_id,
-      provider: service_provider_id,
-      orderID,
-      note
-    });
+  await Promise.all([
+    order.save(),
+    User.updateOne({ _id: user_id }, { $push: { orders: { order: order._id } } }),
+    ServiceProvider.updateOne({ _id: service_provider_id }, { $push: { orders: { order: order._id } } }),
+    Service.updateOne({ _id: service_id }, { $push: { buyers: { orders: { order: order._id } } } }),
+  ]);
 
-    await Promise.all([
-      order.save(),
-      User.updateOne({ _id: user_id }, { $push: { orders: { order: order._id } } }),
-      ServiceProvider.updateOne({ _id: service_provider_id }, { $push: { orders: { order: order._id } } }),
-      Service.updateOne({ _id: service_id }, { $push: { buyers: { orders: { order: order._id } } } }),
-    ]);
+  sendNotification(
+    user.token,
+    `Your Order 📦 for ${service.title} has been Placed 😏 `,
+    `The Order has been placed ${serviceProvider.name} will Come to Your House Shortly, Check For Your Order's Page for More Details`
+  );
+  sendNotification(
+    serviceProvider.token,
+    `You have received 📲 a New Order for 🤑 ${service.title} `,
+    `Please Come to ${user.name} as Soon as Possible`
+  );
 
-    sendNotification(
-      user.token,
-      `Your Order 📦 for ${service.title} has been Placed 😏 `,
-      `The Order has been placed ${serviceProvider.name} will Come to Your House Shortly, Check For Your Order's Page for More Details`
-    );
-    sendNotification(
-      serviceProvider.token,
-      `You have received 📲 a New Order for 🤑 ${service.title} `,
-      `Please Come to ${user.name} as Soon as Possible`
-    );
-
-    res.send({ response: true, orderID });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ response: false, error: 'Internal server error' });
-  }
+  res.send({ response: true, orderID });
 };
-
 
 const update_status = async (req, res) => {
   const { _id, status } = req.body;
