@@ -44,6 +44,7 @@ const acceptDemandedService = async (req, res) => {
     const doc = await DemandService.findOne({ _id: demandedServiceID }).populate('user','toekn name')
     // const SPdoc = await ServiceProvider.findOne({ _id: id }).select('name token')
     doc.serviceProvider = id
+    doc.status = "Accepted"
     await doc.save()
     sendNotification(doc.token, `Your Demand for ${doc.title.slice(0, 5)}... has beed Accepted `, `${doc.name} will arrive to Your Location Soon`, "", "")
 }
@@ -56,7 +57,9 @@ const getDemanedService = async (req, res) => {
         serviceProvider:id
     }
     const doc = await DemandService.findOne({ check }).populate("user").populate("serviceProvider")
-
+    res.send({
+        data:doc
+    })
 }
 
-module.exports = { demandaService, acceptDemandedService }
+module.exports = { demandaService, acceptDemandedService,getDemanedService }
