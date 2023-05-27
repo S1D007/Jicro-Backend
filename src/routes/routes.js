@@ -133,7 +133,7 @@ route.post('/update-profile', verifyToken, updateProfile)
 module.exports = route
 
 // Demand a Service
-const { acceptDemandedService, demandaService, getDemanedService } = require("../controllers/demandService.controller")
+const { acceptDemandedService, demandaService, getDemanedService, getDemanedServiceForAll } = require("../controllers/demandService.controller")
 /** 
  * @Method POST
  * @Route /get-demanded-service
@@ -155,7 +155,7 @@ route.post("/get-demanded-service",verifyToken, getDemanedService)
  */
 
 route.post("/demand-a-service",verifyToken, demandaService)
-/** 
+/**
  * @Method POST
  * @Route /accept-a-demanded-service
  * @FOR Service Provider's
