@@ -40,12 +40,23 @@ const demandaService = async (req, res, next) => {
 const acceptDemandedService = async (req, res) => {
     const { demandedServiceID } = req.body
     const id = req.id
-
-    const doc = await DemandService.findOne({ _id: demandedServiceID });
-    const SPdoc = await ServiceProvider.findOne({ _id: id }).select('name token')
+    
+    const doc = await DemandService.findOne({ _id: demandedServiceID }).populate('user','toekn name')
+    // const SPdoc = await ServiceProvider.findOne({ _id: id }).select('name token')
     doc.serviceProvider = id
     await doc.save()
-    sendNotification(SPdoc.token, `Your Demand for ${doc.title.slice(0, 5)}... has beed Accepted `, `${SPdoc.name} will arrive to Your Location Soon`, "", "")
+    sendNotification(doc.token, `Your Demand for ${doc.title.slice(0, 5)}... has beed Accepted `, `${doc.name} will arrive to Your Location Soon`, "", "")
+}
+const getDemanedService = async (req, res) => {
+    const {type} = req.body;
+    const id = req.id
+    const check = type === "user"? {
+        user:id
+    }:{
+        serviceProvider:id
+    }
+    const doc = await DemandService.findOne({ check }).populate("user").populate("serviceProvider")
+
 }
 
 module.exports = { demandaService, acceptDemandedService }
