@@ -78,7 +78,7 @@ const getDemanedServiceForAll = async (req, res) => {
     const doc = await DemandService.find({ "type.category": profession })
       .populate("user")
 //       .populate("serviceProvider");
-    if (!arr.every(obj => obj.hasOwnProperty("serviceProvider"))) {
+    if (!doc.every(obj => obj.hasOwnProperty("serviceProvider"))) {
       res.send({
         data: doc
       });
