@@ -40,25 +40,50 @@ const demandService = async (req, res, next) => {
 };
 
 const acceptDemandedService = async (req, res) => {
-    const { demandedServiceID } = req.body
-    const id = req.id
-     const doc = await DemandService.findOne({ _id: demandedServiceID })
-    // const SPdoc = await ServiceProvider.findOne({ _id: id }).select('name token')
-    if(!doc.serviceProvider){
-        doc.serviceProvider = id
-    doc.status = "Accepted"
-    await doc.save()
-    sendNotification(doc.token, `Your Demand for ${doc.title.slice(0, 5)}... has beed Accepted `, `${doc.name} will arrive to Your Location Soon`, "", "")
-    res.send({
-        response:true
-    })
-    }else{
-        res.status(400).send({
-            response:false,
-            error: "This Orders Has Already been Accepted By Another Service Provider"
-        })
+  try {
+    const { demandedServiceID } = req.body;
+    const id = req.id;
+    const doc = await DemandService.findOne({ _id: demandedServiceID });
+    
+    if (!doc) {
+      return res.status(404).send({
+        response: false,
+        error: "Demanded service not found",
+      });
     }
-}
+
+    if (doc.serviceProvider) {
+      return res.status(400).send({
+        response: false,
+        error: "This order has already been accepted by another service provider",
+      });
+    }
+
+    doc.serviceProvider = id;
+    doc.status = "Accepted";
+    await doc.save();
+
+    // Assuming `sendNotification` is a function to send push notifications
+    sendNotification(
+      doc.token,
+      `Your Demand for ${doc.title.slice(0, 5)}... has been Accepted`,
+      `${doc.name} will arrive at your location soon`,
+      "",
+      ""
+    );
+
+    res.send({
+      response: true,
+    });
+  } catch (error) {
+    console.error("Error accepting demanded service:", error);
+    res.status(500).send({
+      response: false,
+      error: "An error occurred while accepting the demanded service",
+    });
+  }
+};
+
 const getDemanedService = async (req, res) => {
     const {type} = req.body;
     const id = req.id
