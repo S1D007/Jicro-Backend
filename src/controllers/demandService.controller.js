@@ -99,27 +99,28 @@ const getDemanedService = async (req, res) => {
 }
 const getDemanedServiceForAll = async (req, res) => {
   const { profession } = req.body;
- try {
-    const doc = await DemandService.find({ "type.category": profession }).populate("user");
+  res.send(profession)
+//  try {
+//     const doc = await DemandService.find({ "type.category": profession }).populate("user");
 
-    const filteredDoc = doc.filter((item) => !item.serviceProvider || !item.serviceProvider.trim());
+//     const filteredDoc = doc.filter((item) => !item.serviceProvider || !item.serviceProvider.trim());
      
-    if (filteredDoc.length > 0) {
-      res.send({
-        data: filteredDoc
-      });
-    } else {
-      res.send({
-        data: []
-      });
-    }
-  } catch (error) {
-    console.error("Error fetching demanded services:", error);
-    res.status(500).send({
-      error: "An error occurred while fetching demanded services."
-      dataError:error
-    });
-  }
+//     if (filteredDoc.length > 0) {
+//       res.send({
+//         data: filteredDoc
+//       });
+//     } else {
+//       res.send({
+//         data: []
+//       });
+//     }
+//   } catch (error) {
+//     console.error("Error fetching demanded services:", error);
+//     res.status(500).send({
+//       error: "An error occurred while fetching demanded services."
+//       dataError:error
+//     });
+//   }
 };
 
 
