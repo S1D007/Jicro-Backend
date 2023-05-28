@@ -7,7 +7,7 @@ const get_bookings = async(req, res) => {
     const doc = await Order.find({
       user:_id
     })
-    .populate('provider', 'name banner logo ratings')
+    .populate('provider', 'name banner logo ratings phone_number')
     .populate('service','images title price')
     res.send({
         response:true,
