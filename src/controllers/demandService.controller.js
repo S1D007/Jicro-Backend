@@ -100,12 +100,13 @@ const getDemanedService = async (req, res) => {
 const getDemanedServiceForAll = async (req, res) => {
   const { profession } = req.body;
   try {
-    const doc = await DemandService.find({ "type.category": profession })
-      .populate("user")
-//       .populate("serviceProvider");
-    if (!doc.every(obj => obj.hasOwnProperty("serviceProvider"))) {
+    const doc = await DemandService.find({ "type.category": profession }).populate("user");
+
+    const filteredDoc = doc.filter(obj => !obj.hasOwnProperty("serviceProvider"));
+
+    if (filteredDoc.length > 0) {
       res.send({
-        data: doc
+        data: filteredDoc
       });
     } else {
       res.send({
@@ -113,7 +114,7 @@ const getDemanedServiceForAll = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching demanded services:", error);
     res.status(500).send({
       error: "An error occurred while fetching demanded services."
     });
