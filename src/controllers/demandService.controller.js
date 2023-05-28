@@ -42,7 +42,7 @@ const demandService = async (req, res, next) => {
 const acceptDemandedService = async (req, res) => {
     const { demandedServiceID } = req.body
     const id = req.id
-     const doc = await DemandService.findOne({ _id: demandedServiceID }).populate('user','toekn name')
+     const doc = await DemandService.findOne({ _id: demandedServiceID })
     // const SPdoc = await ServiceProvider.findOne({ _id: id }).select('name token')
     if(!doc.serviceProvider){
         doc.serviceProvider = id
