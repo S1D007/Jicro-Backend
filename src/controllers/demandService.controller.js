@@ -117,6 +117,7 @@ const getDemanedServiceForAll = async (req, res) => {
     console.error("Error fetching demanded services:", error);
     res.status(500).send({
       error: "An error occurred while fetching demanded services."
+      dataError:error
     });
   }
 };
