@@ -99,11 +99,11 @@ const getDemanedService = async (req, res) => {
 }
 const getDemanedServiceForAll = async (req, res) => {
   const { profession } = req.body;
-   try {
+ try {
     const doc = await DemandService.find({ "type.category": profession }).populate("user");
 
-    const filteredDoc = doc.filter(obj => obj.hasOwnProperty("serviceProvider") || obj.serviceProvider);
-
+    const filteredDoc = doc.filter((item) => !item.serviceProvider || !item.serviceProvider.trim());
+     
     if (filteredDoc.length > 0) {
       res.send({
         data: filteredDoc
