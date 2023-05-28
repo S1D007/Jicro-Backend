@@ -72,17 +72,28 @@ const getDemanedService = async (req, res) => {
         data:doc
     })
 }
-const getDemanedServiceForAll = async (req, res) => {
-    const {profession} = req.body;
-    const doc = await DemandService.findOne({ type:{category: profession} }).populate("user").populate("serviceProvider")
-    if(!doc.serviceProvider){
-        res.send({
-        data:doc
-        })
-    }else{
-    res.send({
-        data:[]
-    })}
-}
+const getDemandedServiceForAll = async (req, res) => {
+  const { profession } = req.body;
+  try {
+    const doc = await DemandService.find({ "type.category": profession, serviceProvider: { $ne: "" } })
+      .populate("user")
+      .populate("serviceProvider");
+    if (doc.length > 0) {
+      res.send({
+        data: doc
+      });
+    } else {
+      res.send({
+        data: []
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      error: "An error occurred while fetching demanded services."
+    });
+  }
+};
+
 
 module.exports = { demandService, acceptDemandedService, getDemanedService, getDemanedServiceForAll }
