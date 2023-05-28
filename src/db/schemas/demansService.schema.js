@@ -39,7 +39,7 @@ const orderSchema = mongoose.Schema({
     },
     serviceProvider: {
         type: mongoose.Types.ObjectId,
-        ref: 'ServiceProvider'
+        ref: 'ServiceProvider',
         default:""
     }
 })
