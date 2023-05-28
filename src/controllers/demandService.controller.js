@@ -99,8 +99,6 @@ const getDemanedService = async (req, res) => {
 }
 const getDemanedServiceForAll = async (req, res) => {
   const { profession } = req.body;
-  res.send(profession)
-// const { profession } = req.body;
   try {
     const doc = await DemandService.find({ "type.category": profession }).populate("user");
 
