@@ -92,7 +92,7 @@ const getDemanedService = async (req, res) => {
     }:{
         serviceProvider:id
     }
-    const doc = await DemandService.findOne(check).populate("user").populate("serviceProvider")
+    const doc = await DemandService.find(check).populate("user").populate("serviceProvider")
     res.send({
         data:doc
     })
