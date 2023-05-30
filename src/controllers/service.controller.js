@@ -5,24 +5,25 @@ const ServiceProvider = require("../db/models/ServiceProvider.model");
 const { client } = require("../config/redisConnect");
 const sendNotification = require("../service/Notification/sendNotification");
 
-const add_service = async (req, res) => {
+const addService = async (req, res) => {
   const id = req.id;
   const { title, images, price, details, note, included, notIncluded, category, sub_category } = req.body;
   const orderID = `J-${title.split(' ').map((e) => e.charAt(0)).join('')}${Math.floor(Math.random() * 100)}`.toUpperCase();
-  const random = (Math.random() * 4)
-  const multiplyVal = Math.floor(random) === 0 ? 1 : random
-  const multipliedVal = Math.floor(price * multiplyVal)
-  const endsWithZeroOrFiveorSomethingShit = multipliedVal.toString().endsWith('0') || multipliedVal.toString().endsWith('5') || multipliedVal.toString().endsWith('01')
-  const manupulated = !multipliedVal === 100 && endsWithZeroOrFiveorSomethingShit ? multipliedVal - 1 : multipliedVal
-  const discount = (((manupulated - price) / manupulated) * 100).toFixed(0)
+  const random = Math.random() * 4;
+  const multiplyVal = Math.floor(random) === 0 ? 1 : random;
+  const multipliedVal = Math.floor(price * multiplyVal);
+  const endsWithZeroOrFive = multipliedVal.toString().endsWith('0') || multipliedVal.toString().endsWith('5');
+  const manipulated = !multipliedVal === 100 && endsWithZeroOrFive ? multipliedVal - 1 : multipliedVal;
+  const discount = (((manipulated - price) / manipulated) * 100).toFixed(0);
+
   try {
     const SP = await ServiceProvider.findOne({ _id: id });
     const service = new Service({
       title,
       images,
       price: {
-        manupulated: manupulated,
-        discount: discount,
+        manipulated,
+        discount,
         actual: price
       },
       ratings: "0.0",
@@ -33,7 +34,7 @@ const add_service = async (req, res) => {
       note,
       included,
       notIncluded,
-      type:{
+      type: {
         category,
         sub_category
       }
@@ -43,14 +44,16 @@ const add_service = async (req, res) => {
       response: true,
       data: service
     });
-  } catch (e) {
+  } catch (error) {
+    console.error("Error adding service:", error);
     res.status(400).json({
       response: false,
-      error: e
+      error: "An error occurred while adding the service"
     });
   }
 };
-const get_services = async (req, res) => {
+
+const getServices = async (req, res) => {
   const {
     latitude,
     longitude,
@@ -89,14 +92,14 @@ const get_services = async (req, res) => {
     };
 
     if (minPrice && maxPrice) {
-      serviceQuery['price.manupulated'] = {
+      serviceQuery['price.manipulated'] = {
         $gte: minPrice,
         $lte: maxPrice
       };
     } else if (minPrice) {
-      serviceQuery['price.manupulated'] = { $gte: minPrice };
+      serviceQuery['price.manipulated'] = { $gte: minPrice };
     } else if (maxPrice) {
-      serviceQuery['price.manupulated'] = { $lte: maxPrice };
+      serviceQuery['price.manipulated'] = { $lte: maxPrice };
     }
 
     if (minRatings) {
@@ -117,9 +120,9 @@ const get_services = async (req, res) => {
     const sortQuery = {};
 
     if (sortBy === 'priceAsc') {
-      sortQuery['price.manupulated'] = 1;
+      sortQuery['price.manipulated'] = 1;
     } else if (sortBy === 'priceDesc') {
-      sortQuery['price.manupulated'] = -1;
+      sortQuery['price.manipulated'] = -1;
     } else if (sortBy === 'ratingAsc') {
       sortQuery['ratings'] = 1;
     } else if (sortBy === 'ratingDesc') {
@@ -132,91 +135,130 @@ const get_services = async (req, res) => {
 
     const services = servicesList.map((service) => service);
     res.json(services);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('An error occurred while fetching services');
+  } catch (error) {
+    console.error("Error fetching services:", error);
+    res.status(500).send({
+      response:false,
+      error:"An error Occured while Fetching the Services"
+    });
   }
 };
 
-
-
-const get_service = async (req, res) => {
+const getService = async (req, res) => {
   const { _id } = req.body;
-  const doc = await Service.findOne({ _id }).populate('provider', 'name title banner logo ratings')
-  res.send(doc)
-}
-const get_all_services = async (req, res) => {
-  const _id = req.id;
-  const services = await Service.find({
-    provider: _id
-  })
+  try {
+    const doc = await Service.findOne({ _id }).populate('provider', 'name title banner logo ratings');
+    res.send(doc);
+  } catch (error) {
+    console.error("Error getting service:", error);
+    res.status(400).json({
+      response: false,
+      error: "An error occurred while getting the service"
+    });
+  }
+};
 
-  res.send({
-    response: true,
-    data: services
-  })
-}
-const order_service = async (req, res) => {
+const getAllServices = async (req, res) => {
+  const _id = req.id;
+  try {
+    const services = await Service.find({ provider: _id });
+    res.send({
+      response: true,
+      data: services
+    });
+  } catch (error) {
+    console.error("Error getting all services:", error);
+    res.status(400).json({
+      response: false,
+      error: "An error occurred while getting all services"
+    });
+  }
+};
+
+const orderService = async (req, res) => {
   const { service_provider_id, service_id, note } = req.body;
   const user_id = req.id;
 
-  const [user, serviceProvider, service] = await Promise.all([
-    User.findOne({ _id: user_id }).select('orders token name').lean(),
-    ServiceProvider.findOne({ _id: service_provider_id }).select('orders token name').lean(),
-    Service.findOne({ _id: service_id }).select('buyers orderID title').lean(),
-  ]);
+  try {
+    const [user, serviceProvider, service] = await Promise.all([
+      User.findOne({ _id: user_id }).select('orders token name').lean(),
+      ServiceProvider.findOne({ _id: service_provider_id }).select('orders token name').lean(),
+      Service.findOne({ _id: service_id }).select('buyers orderID title').lean()
+    ]);
 
-  const orderID = `${service.orderID}${Math.floor(Math.random() * 100)}`;
-  const order = new Order({
-    user: user_id,
-    service: service_id,
-    provider: service_provider_id,
-    orderID,
-    note
-  });
+    const orderID = `${service.orderID}${Math.floor(Math.random() * 100)}`;
+    const order = new Order({
+      user: user_id,
+      service: service_id,
+      provider: service_provider_id,
+      orderID,
+      note
+    });
 
-  await Promise.all([
-    order.save(),
-    User.updateOne({ _id: user_id }, { $push: { orders: { order: order._id } } }),
-    ServiceProvider.updateOne({ _id: service_provider_id }, { $push: { orders: { order: order._id } } }),
-    Service.updateOne({ _id: service_id }, { $push: { buyers: { orders: { order: order._id } } } }),
-  ]);
+    await Promise.all([
+      order.save(),
+      User.updateOne({ _id: user_id }, { $push: { orders: { order: order._id } } }),
+      ServiceProvider.updateOne({ _id: service_provider_id }, { $push: { orders: { order: order._id } } }),
+      Service.updateOne({ _id: service_id }, { $push: { buyers: { orders: { order: order._id } } } })
+    ]);
 
-  sendNotification(
-    user.token,
-    `Your Order 📦 for ${service.title} has been Placed 😏 `,
-    `The Order has been placed ${serviceProvider.name} will Come to Your House Shortly, Check For Your Order's Page for More Details`
-  );
-  sendNotification(
-    serviceProvider.token,
-    `You have received 📲 a New Order for 🤑 ${service.title} `,
-    `Please Come to ${user.name} as Soon as Possible`
-  );
+    sendNotification(
+      user.token,
+      `Your Order 📦 for ${service.title} has been Placed 😏 `,
+      `The Order has been placed ${serviceProvider.name} will Come to Your House Shortly, Check For Your Order's Page for More Details`
+    );
+    sendNotification(
+      serviceProvider.token,
+      `You have received 📲 a New Order for 🤑 ${service.title} `,
+      `Please Come to ${user.name} as Soon as Possible`
+    );
 
-  res.send({ response: true, orderID });
+    res.send({ response: true, orderID });
+  } catch (error) {
+    console.error("Error ordering service:", error);
+    res.status(400).json({
+      response: false,
+      error: "An error occurred while ordering the service"
+    });
+  }
 };
 
-const update_status = async (req, res) => {
+const updateStatus = async (req, res) => {
   const { _id, status } = req.body;
-  await Order.findOneAndUpdate({ _id }, {
-    $set: {
-      status
-    }
-  })
-  res.send({
-    response: true
-  })
-}
+  try {
+    await Order.findOneAndUpdate({ _id }, {
+      $set: {
+        status
+      }
+    });
+    res.send({
+      response: true
+    });
+  } catch (error) {
+    console.error("Error updating status:", error);
+    res.status(400).json({
+      response: false,
+      error: "An error occurred while updating the status"
+    });
+  }
+};
 
-const update_service = async () => {
+const updateService = async (req, res) => {
   const { _id, updates } = req.body;
-  await Service.findOneAndUpdate({ _id }, {
-    $set: updates
-  })
-  res.send({
-    response: true,
-  })
-}
+  try {
+    await Service.findOneAndUpdate({ _id }, {
+      $set: updates
+    });
+    res.send({
+      response: true
+    });
+  } catch (error) {
+    console.error("Error updating service:", error);
+    res.status(400).json({
+      response: false,
+      error: "An error occurred while updating the service"
+    });
+  }
+};
 
-
-module.exports = { add_service, get_services, get_service, order_service, update_status, get_all_services, update_service };
+module.exports = { addService, getServices, getService, orderService, updateStatus, getAllServices, updateService };

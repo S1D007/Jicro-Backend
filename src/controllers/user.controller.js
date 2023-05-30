@@ -3,7 +3,7 @@ const User = require("../db/models/User.model");
 
 const get_bookings = async(req, res) => {
     const _id = req.id
-    // TODO change orders ->  Booings in { Schema }
+    // TODO change orders ->  Bookings in { Schema }
     const doc = await Order.find({
       user:_id
     })

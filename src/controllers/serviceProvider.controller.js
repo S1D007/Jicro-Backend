@@ -5,20 +5,21 @@ const ServiceProvider = require("../db/models/ServiceProvider.model");
 const getDetails = async (req, res) => {
   const id = req.id;
   try {
-    const serviceProvider = await ServiceProvider.findOne({ _id: id }).select('logo banner ratings name services profession')
+    const serviceProvider = await ServiceProvider.findOne({ _id: id }).select('logo banner ratings name services profession');
     if (!serviceProvider) {
       return res.status(404).json({
-        success: false,
+        response: false,
         error: `No service provider found with id ${id}`,
       });
     }
     res.status(200).json({
-      success: true,
+      response: true,
       data: serviceProvider,
     });
   } catch (error) {
+    console.error("Error getting service provider details:", error);
     res.status(500).json({
-      success: false,
+      response: false,
       error: "Internal server error",
     });
   }
@@ -26,29 +27,39 @@ const getDetails = async (req, res) => {
 
 const getOrders = async (req, res) => {
   const _id = req.id;
-  const doc = await Order.find({ provider: _id })
-    .populate('service', 'title price phone_number images type.sub_category ')
-    .populate('user', 'name location phone_number')
-  res.send({
-    response: true,
-    data: doc
-  })
-}
+  try {
+    const doc = await Order.find({ provider: _id })
+      .populate('service', 'title price phone_number images type.sub_category')
+      .populate('user', 'name location phone_number');
+    res.status(200).json({
+      response: true,
+      data: doc,
+    });
+  } catch (error) {
+    console.error("Error getting orders:", error);
+    res.status(500).json({
+      response: false,
+      error: "Internal server error",
+    });
+  }
+};
 
 const updateProfile = async (req, res) => {
   const _id = req.id;
-  const {updates} = req.body;
+  const { updates } = req.body;
 
   try {
-      await ServiceProvider.findOneAndUpdate({ _id },{
-        $set:updates
-      });
-      res.send({
-        response: true
-      });
+    await ServiceProvider.findOneAndUpdate({ _id }, { $set: updates });
+    res.status(200).json({
+      response: true,
+    });
   } catch (error) {
-    res.status(400).send(error);
+    console.error("Error updating service provider profile:", error);
+    res.status(500).json({
+      response: false,
+      error: "Internal server error",
+    });
   }
-}
+};
 
 module.exports = { getDetails, getOrders, updateProfile };
